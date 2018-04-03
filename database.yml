@@ -1,0 +1,7 @@
+development:
+    adapter: 'mysql2'
+    host: 'localhost'
+    database: 'todo'
+    user: 'root'
+    
+

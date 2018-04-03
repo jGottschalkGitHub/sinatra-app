@@ -1,0 +1,32 @@
+.col-md-8.col-md-offset-2
+    .has-below
+    .panel.panel-primary
+        .panel-heading
+            h3.panel-title Edit List
+        .panel-body
+            form.form-horizontal name="list" method="post" action= url("/edit")
+                .form-group
+                    label.control-label.col-md-4 for="name" List Name
+                    .col-md-4
+                        input.form-control type="text" name="id" value="#{list.id}" read_only=true
+                .form-group
+                    label.control-label.col-md-4 for="id" List ID
+                    .col-md-4
+                        input.form-control type="text" name="name" value="#{list.name}" placeholder="#{list.name}"
+                hr
+                - list.items.each do |item|
+                   .form-group.item-group
+                        .col-md-4
+                            input.form-control type="text" name="items[][id]" value="#{item.id}"
+                        .col-md-4
+                            input.form-control type="text" name="items[][name]" value="#{item.name}" placeholder="#{item.name}"
+                        .col-md-8
+                            textarea.form-control type="text" name="items[]description" value="#{item.description}" placeholder="#{item.description}"
+                hr
+                .form-group
+                .col-md-2.col-md-offset-3
+                    button.btn.btn-sm.btn-primary type= "submit"
+                        i.glyphicon.glyphicon-ok
+                        Edit
+
+

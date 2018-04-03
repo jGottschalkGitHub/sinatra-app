@@ -1,0 +1,68 @@
+css:
+    button.btn.btn-sm.btn-primary{
+        background-color: purple;
+        color: #ffffff;
+        width: 80px;
+        height: 40px;
+        border: purple;
+    }
+    input[type=checkbox]{
+        position: relative;
+        top: 5px;
+    }
+
+
+
+.col-md-8.col-md-offset-2
+    .has-below
+    .panel.panel-primary
+        .panel-heading
+            h3.panel-title Edit List
+        .panel-body
+            form.form-horizontal name="list" method="post" action= url("/edit")
+                .form-group
+                    label.control-label.col-md-4 for="name" List ID
+                    .col-md-4
+                        input.form-control type="text" name="id" value="#{list.id}" read_only=true
+                .form-group
+                    label.control-label.col-md-4 for="id" List Name
+                    .col-md-4
+                        input.form-control type="text" name="name" value="#{list.name}" placeholder="#{list.name}"
+                hr
+                - items.each do |item|
+                   .form-group.item-group
+                        .col-md-1
+                             - if item.starred
+                                input type="checkbox" name="items[][starred]" checked=true
+                             - else
+                                input type="checkbox" name="items[][starred]" checked=false
+                        .col-md-1
+                            input.form-control type="text" name="items[][id]" value="#{item.id}"
+                        .col-md-3
+                            input.form-control type="text" name="items[][name]" value="#{item.name}" placeholder="#{item.name}"
+                        .col-md-3
+                            textarea.form-control type="text" name="items[]description" value="#{item.description}" placeholder="#{item.description}"  #{item.description}
+                                               
+                        .col-md-2
+                            label Due Date
+                            - if item.due_date
+                                - date, waste = item.due_date.to_s.split(" ")
+                                - y,m,d = date.split("-")
+                                - date = "#{d}/#{m}/#{y}"
+                                input type="text" name="items[]date" id="datepicker" value="#{date}"
+                            -else 
+                                input type="text" name="items[]date" id="datepicker" value=""
+                hr
+                .form-group
+                .col-md-12.col-md-offset-10
+                    button.btn.btn-sm.btn-primary type= "submit" SAVE
+                        
+                        
+
+javascript:
+    document.addEventListener('DOMContentLoaded', function() {  
+        $( function() {
+            $( "#datepicker" ).datepicker();
+        });
+    });
+  

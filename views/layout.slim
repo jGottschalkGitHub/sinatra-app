@@ -1,0 +1,47 @@
+doctype html
+html
+  head
+    title ToDo
+   
+    link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous"
+    script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"
+    script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" crossorigin="anonymous"
+    script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" crossorigin="anonymous"
+    link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"
+    
+    css:
+      .has-below {
+        padding-bottom: 20px;
+      }
+        body{
+          background-color: #5c8ad6
+      }
+
+  body
+    .container-fluid
+      .col-md-12
+        .row
+          nav.navbar.navbar-inverse.navbar-fixed-top role='navigation'
+            .navbar-inner
+              .container-fluid
+                .navbar-header
+                  button.navbar-toggle data-toggle='collapse'
+                    span.icon-bar
+                    span.icon-bar
+                    span.icon-bar
+                  a.navbar-brand href= url('/')
+                    i.glyphicon.glyphicon-home
+                  a.navbar-brand.navbar-right href= url('/')
+                    i.glyphicon.glyphicon-eject
+                   
+        .has-below
+        .has-below
+        .has-below
+        .has-below
+        .has-below
+        .has-below
+        .row
+          == yield
+  
+
+

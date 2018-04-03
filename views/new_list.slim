@@ -1,0 +1,48 @@
+.col-md-8.col-md-offset-2
+    .has-below
+    .has-below
+    .has-below
+    .has-below
+    .has-below
+    .panel.panel-primary
+        .panel-heading
+            h3.panel-title Create List
+        .panel-body
+            form.form-horizontal name="list" method="post" action=url("/new")
+                .form-group
+                    label.control-label.col-md-4 for="name" List Name
+                    .col-md-8
+                        input.form-control type="text" name="name"
+                hr
+                .form-group.item-group
+                    .col-md-4
+                        input.form-control type="text" name="items[][name]" placeholder="Item name"
+                    .col-md-8
+                        textarea.form-control type="text" name="items[][description]" placeholder="Item description"
+                #items_list.form-group
+                    a href='javascript:void(0)' id='add-item' class='col-md-3' Add Item
+                hr
+                .form-group
+                    .col-md-2.col-md-offset-3
+                        button.btn.btn-sm.btn-primary type="submit"
+                            i.glyphicon.glyphicon-ok
+                            Create
+  
+script type="text/template" id='item_template'
+    .form-group.item-group
+        .col-md-4
+        input.form-control type="text" name="items[][name]" placeholder="Item name"
+        .col-md-8
+        textarea.form-control type="text" name="items[][description]" placeholder="Item description"
+
+
+javascript:
+    document.addEventListener('DOMContentLoaded', function() {
+    $(document).on('click', '#add-item', function(){
+            var template_text = $('#item_template').html()
+            $('#items_list').before(template_text);
+            });
+        });
+   
+
+    

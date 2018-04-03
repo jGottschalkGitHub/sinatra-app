@@ -1,0 +1,78 @@
+css: 
+    body{
+        font-size: 17px;
+    }
+    .star{
+        
+        font-size: 20px;
+        color: #efaf1a;
+        position: relative;
+        top: -3px;
+    }
+    .no-star{
+        
+        font-size: 20px;
+        color: #d817c5;
+        position: relative;
+        top: -2px;
+      }
+
+    .button.edit{
+        padding: 14px 25px 14px 25px;
+        border: 1px solid #6b8ec6;
+        background-color: #8c1084;
+        border-radius: 5px;
+        color: #ffffff;
+        border: 1px solid #d8c1084;
+    }  
+    .row.items{
+        height: 50px;
+    }
+    hr{
+        color: #000000;
+    }
+    .titles{
+        margin-bottom: 20px;
+    }
+
+.col-md-8.col-md-offset-2
+    .has-below
+    .panel.panel-primary
+        .panel-heading
+            h3.panel-title #{@list.name}
+        .panel-body
+            div
+                .row.titles.col-md-12
+                    .col-md-1
+                    
+                    .col-md-3
+                        h4 Items
+                    .col-md-4
+                        h4 Details          
+                    .col-md-3
+                        h4 Duedate
+            
+                - @list.items.each do |item|
+                    .row.items.col-md-12
+                        div 
+                            .col-md-1
+                                - if item.starred
+                                    p class="star" ★
+                                - else 
+                                    p class="no-star" ✓   
+                            .col-md-3
+                                p #{item.name}
+                            .col-md-4
+                                p #{item.description}                 
+                            .col-md-4
+                                - if item.due_date
+                                    - date, waste = item.due_date.to_s.split(" ")
+                                    - y,m,d = date.split("-")
+                                    - date = "#{d}/#{m}/#{y}"
+                                    p #{date}
+                                -else 
+                                    p You have all the time in the world
+                
+.col-md-8.col-md-offset-8
+    .row.items.col-md-12
+        a class="button edit" href="/edit/#{@list.id}" Edit           
