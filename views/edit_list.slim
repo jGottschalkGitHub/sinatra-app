@@ -48,10 +48,10 @@ css:
                             - if item.due_date
                                 - date, waste = item.due_date.to_s.split(" ")
                                 - y,m,d = date.split("-")
-                                - date = "#{d}/#{m}/#{y}"
-                                input type="text" name="items[]date" id="datepicker" value="#{date}"
+                                - date = "#{m}/#{d}/#{y}"
+                                input type="text" name="items[]date" min="#{Time.now}" class="datepicker" value="#{date}"
                             -else 
-                                input type="text" name="items[]date" id="datepicker" value=""
+                                input type="text" name="items[]date" class="datepicker" value=""
                 hr
                 .form-group
                 .col-md-12.col-md-offset-10
@@ -62,7 +62,7 @@ css:
 javascript:
     document.addEventListener('DOMContentLoaded', function() {  
         $( function() {
-            $( "#datepicker" ).datepicker();
+            $( ".datepicker" ).datepicker();
         });
     });
   

@@ -48,7 +48,6 @@ class List < Sequel::Model
         items.each do |item|
            item_id = item[:id].to_i
             if item[:deleted]
-
                 i = Item.first(id: item_id).destroy
                 next
             end
@@ -66,9 +65,7 @@ class List < Sequel::Model
                 i.name = name  
                 i.description = item["description"]
                 i.updated_at = Time.now 
-                
                 item["starred"] ? i.starred = 1 : i.starred = 0
-                #duedate = DateTime.parse(item["date"]) if item["date"]
                 m, d, y = item["date"].split("/") if item["date"]
                 duedate = Time.utc(y,m,d) if y 
                 i.due_date = duedate if duedate && duedate > Time.now     
