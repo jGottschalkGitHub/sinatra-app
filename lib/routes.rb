@@ -72,16 +72,14 @@ get '/edit/:id/?' do
     end
 
     if can_edit
-        #items_sorted = List.first(id: params[:id]).items_dataset.order(Sequel.desc(:starred))
-        
+        #items_sorted = List.first(id: params[:id]).items_dataset.order(Sequel.desc(:starred))   
         #dataset.order(:kind) # kind
         #dataset.reverse(:kind) # kind DESC
         #dataset.order(Sequel.desc(:kind), :name) # kind DESC, name
-        #items_sorted=list.items.sort_by{ |item| item[:starred] ? 0 : 1}
-        
+        items_sorted = list.items.sort_by{ |item| item[:starred] ? 0 : 1}
         #items_sorted = list.items_dataset.select_order_map(:checked).reverse
-        items_sorted = list.items_dataset.order(Sequel.desc(:starred))
-        binding.pry
+        #items_sorted = list.items_dataset.order(Sequel.desc(:starred))
+        #binding.pry
         slim :edit_list, locals: {list: list, items: items_sorted}
     else
         slim :error, locals: {error: 'Invalid permissions'}
