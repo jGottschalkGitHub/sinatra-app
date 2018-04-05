@@ -15,6 +15,9 @@ html
       }
         body{
           background-color: #5c8ad6
+      }.myfooter{
+        padding-left: 0;
+        padding-right: 0;
       }
 
   body
@@ -31,9 +34,11 @@ html
                     span.icon-bar
                   a.navbar-brand href= url('/')
                     i.glyphicon.glyphicon-home
-                  a.navbar-brand.navbar-right href= url('/')
+                  a.navbar-brand href= url('/logout')
                     i.glyphicon.glyphicon-eject
-                   
+                  a.navbar-brand href= url('/signup') Signup
+                  a.navbar-brand href= url('/login') Login
+                                     
         .has-below
         .has-below
         .has-below
@@ -42,6 +47,11 @@ html
         .has-below
         .row
           == yield
+
+
+    .container-fluid
+      .col-md-12.myfooter
+        == slim :"/_footer"
   
 
 

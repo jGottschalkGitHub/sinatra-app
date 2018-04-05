@@ -39,6 +39,15 @@ class List < Sequel::Model
         
     end
 
+    #this is an instance method called on the instance of List that we are in
+    #use instead of self.delete_list
+    def before_destroy
+        items.each(&:destroy)
+        permissions.each(&:destroy)
+        comments.each(&:destroy)
+        super
+    end
+
     def self.edit_list id, name, items, user
         list = List.first(id: id)
         ##list.name = name
@@ -66,7 +75,7 @@ class List < Sequel::Model
                 i.description = item["description"]
                 i.updated_at = Time.now 
                 item["starred"] ? i.starred = 1 : i.starred = 0
-                m, d, y = item["date"].split("/") if item["date"]
+                y, m, d = item["date"].split("-") if item["date"]
                 duedate = Time.utc(y,m,d) if y 
                 i.due_date = duedate if duedate && duedate > Time.now     
                 i.save

@@ -23,11 +23,13 @@ class Comment < Sequel::Model
        
     end
 
+    def before_destroy
+        puts "destroying comment #{self.id}"
+    end
+
     #here we do not need to use self. since we are operating from an instance of Comment
     def editable? user
-        puts "inside editable"
-        puts user_id == user.id && creation_date > Time.now - 15 * 60
-        user_id == user.id && creation_date > Time.now - 15 * 60
+        user_id == user.id && creation_date > Time.now - 15 * 60 #returns true
     end
 
 end

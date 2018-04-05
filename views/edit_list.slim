@@ -46,12 +46,17 @@ css:
                         .col-md-2
                             label Due Date
                             - if item.due_date
-                                - date, waste = item.due_date.to_s.split(" ")
-                                - y,m,d = date.split("-")
-                                - date = "#{m}/#{d}/#{y}"
-                                input type="text" name="items[]date" min="#{Time.now}" class="datepicker" value="#{date}"
+                                //- date, waste = item.due_date.to_s.split(" ")
+                                //- y,m,d = date.split("-")
+                                //- date = "#{y}/#{m}/#{d}"
+                                //- time_now = Time.now.to_s[0..-16]
+                                //p "#{time_now}" 
+                                // 2018-04-05 Format needed for min
+                                - time_now = Time.now.strftime('%Y-%m-%d')
+                                //input.form-control type="date" name="items[][due_date]" min="#{time_now}" value="#{item.due_date&.strftime('%Y-%m-%d')}"        
+                                input type="date" name="items[]date" min="#{time_now}" value="#{item.due_date&.strftime('%Y-%m-%d')}"
                             -else 
-                                input type="text" name="items[]date" class="datepicker" value=""
+                                input type="date" name="items[]date" min="#{time_now}" value=""
                 hr
                 .form-group
                 .col-md-12.col-md-offset-10

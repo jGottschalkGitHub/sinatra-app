@@ -6,10 +6,6 @@ before do
     @user = User.first(id: session[:user_id]) if session[:user_id]
 end
 
-#class variable access from toplevel
-
-
-
 
 get '/?' do 
   
@@ -19,12 +15,6 @@ get '/?' do
         all_lists =  List.all 
         @user = User.first(id: session[:user_id])
         all_lists = List.association_join(:permissions).where(user_id: @user.id)
-        
-               
-                    #comment["edit"]="true"
-                    #comments[i][:mysym] = "true"
-                    #comments[i][:edit] = true
-        
         slim :list, locals: {list: all_lists}
     end
    
@@ -36,7 +26,6 @@ get '/list/:id' do
     if session[:user_id].nil?
         slim :error
     else
-        
         all_lists = List.all 
         @user = User.first(id: session[:user_id])
         @list = List.first(id: params[:id])
@@ -48,7 +37,8 @@ end
 
 get '/comment/delete/:id' do
     commentId = params[:id]
-    Comment.delete_comment commentId
+    #Comment.delete_comment commentId
+    comment = Comment.first(id: commentId).destroy
     redirect "http://localhost:4567/"
 end
 
@@ -83,9 +73,8 @@ get '/edit/:id/?' do
 
     if can_edit
         items_sorted=list.items.sort_by{ |item| item[:starred] ? 0 : 1}
-        #@sorted_list = @list.items_dataset.select_order_map(:checked).reverse
-        #@sorted_list = @list.items_dataset.order(Sequel.desc(:checked))
-        
+        #items_sorted = list.items_dataset.select_order_map(:checked).reverse
+        #items_sorted = list.items_dataset.order(Sequel.desc(:starred))  
         slim :edit_list, locals: {list: list, items: items_sorted}
     else
         slim :error, locals: {error: 'Invalid permissions'}
@@ -101,17 +90,16 @@ post '/edit/?' do
     userid = session[:user_id]
     user = User.first(id: session[:user_id])
     List.edit_list listid, listname, params[:items], user
-    redirect '/'
-    #redirect "http://localhost:4567/lists/#{list_id}"
+    redirect "http://localhost:4567/list/#{listid}"
 end 
 
 post '/update/?' do
     @user = User.first(id: session[:user_id])
-    list_name = params[:lists][0]['name']
+    listname = params[:lists][0]['name']
     #list_name = List.get(:name)
-    list_id = params[:lists][0][:id].to_i
+    listid = params[:lists][0][:id].to_i
     list = List.edit_list list_id, list_name, params[:items], @user
-    redirect "http://localhost:4567/lists/#{list_id}"
+    redirect "http://localhost:4567/list/#{listid}"
     #redirect request.referer
 end
 
@@ -124,12 +112,10 @@ post '/comment/:id' do
 end
 
 post '/permission/?' do 
-    # update permission 
-    
+
     user = User.first(id: session[:user_id])
     list = List.first(id: params[:id])
     can_change_permission = true
-    
     if list.nil?
         can_change_permission = false
     elsif list.shared_with != 'public'
@@ -142,7 +128,6 @@ post '/permission/?' do
     if can_change_permission
         list.permission = params[:new_permissions]
         list.save
-    
         current_permissions = Permission.first(list: list)
         current_permissions.each do |perm|
             perm.destroy
@@ -186,7 +171,7 @@ get '/login/?' do
     if session[:user_id].nil?
       slim :login
     else
-      slim :error, locals: {error: 'Please log out first'}
+      slim :login
     end
 
 end 
@@ -196,7 +181,7 @@ post '/login/?' do
     md5sum = Digest::MD5.hexdigest params[:password]
     user = User.first(name: params[:name], password: md5sum)
     if user.nil?
-        puts "user nil"
+        
       slim :error, locals: {error: 'Invalid login credentials'}
     else
      
@@ -207,7 +192,10 @@ end
 
 get '/delete/:id/?'do
     id = params[:id]
-    list = List.delete_list id
+    #list = List.delete_list id
+
+    #getting instance of List and calling destroy on it -> will activate destroy hook
+    List.first(id: id).destroy
     redirect 'http://localhost:4567/'
 end
 
