@@ -48,15 +48,13 @@ css:
                             - if item.due_date
                                 //- date, waste = item.due_date.to_s.split(" ")
                                 //- y,m,d = date.split("-")
-                                //- date = "#{y}/#{m}/#{d}"
-                                //- time_now = Time.now.to_s[0..-16]
+                                //- date = "#{y}/#{m}/#{d}
                                 //p "#{time_now}" 
                                 // 2018-04-05 Format needed for min
-                                - time_now = Time.now.strftime('%Y-%m-%d')
-                                //input.form-control type="date" name="items[][due_date]" min="#{time_now}" value="#{item.due_date&.strftime('%Y-%m-%d')}"        
-                                input type="date" name="items[]date" min="#{time_now}" value="#{item.due_date&.strftime('%Y-%m-%d')}"
+                                - curr_time = Time.now.strftime('%Y-%m-%d')
+                                input type="date" name="items[]date" min="#{curr_time}" value="#{item.due_date&.strftime('%Y-%m-%d')}"
                             -else 
-                                input type="date" name="items[]date" min="#{time_now}" value=""
+                                input type="date" name="items[]date" min="#{curr_time}" value=""
                 hr
                 .form-group
                 .col-md-12.col-md-offset-10
