@@ -10,24 +10,27 @@ class List < Sequel::Model
 
     def self.new_list name, items, user
         
-        list = List.create(name: name, created_at: Time.now)
-        items.each do |item|
-            Item.create(
-                name: item[:name], 
-                description: item[:description], 
-                list: list, user: user, 
+        list = List.new(name: name, created_at: Time.now)
+        list_saved = list.save
+        if list_saved
+            items.each do |item|
+                Item.create(
+                    name: item[:name], 
+                    description: item[:description], 
+                    list: list, user: user, 
+                    created_at: Time.now, 
+                    updated_at: Time.now
+                    )
+            end
+            Permission.create(
+                list: list, 
+                user: user, 
+                permission_level: 'read_write', 
                 created_at: Time.now, 
                 updated_at: Time.now
-                )
+            )  
+            return list_saved
         end
-        Permission.create(
-            list: list, 
-            user: user, 
-            permission_level: 'read_write', 
-            created_at: Time.now, 
-            updated_at: Time.now
-            )
-        
         return list
     end
 
@@ -48,37 +51,56 @@ class List < Sequel::Model
         super
     end
 
+    def before_validation
+        self.created_at ||= Time.now
+    
+    end
+    
+    def validate
+        super
+        validates_presence [:name, :created_at]
+        validates_format /\A[A-Za-z]*\Z/, :name, message: 'is not a valid name'
+        validates_min_length 3, :name
+        validates_max_length 20, :name
+        validates_unique :name
+        
+    end
+
     def self.edit_list id, name, items, user
         list = List.first(id: id)
         ##list.name = name
         #list.updated_at = Time.now
         booli = true
         list.save
-        items.each do |item|
-           item_id = item[:id].to_i
-            if item[:deleted]
-                i = Item.first(id: item_id).destroy
-                next
-            end
-                i = Item.first(id: item_id)
-            if i.nil?
-                Item.create(
-                    name: item["name"], 
-                    description: item[:description], 
-                    list: list, 
-                    user: user, 
-                    created_at: Time.now, 
-                    updated_at: Time.now)
-            else
-                name = item["name"]
-                i.name = name  
-                i.description = item["description"]
-                i.updated_at = Time.now 
-                item["starred"] ? i.starred = 1 : i.starred = 0
-                y, m, d = item["date"].split("-") if item["date"]
-                duedate = Time.utc(y,m,d) if y 
-                i.due_date = duedate if duedate && duedate > Time.now     
-                i.save
+        if list.save
+            items.each do |item|
+            item_id = item[:id].to_i
+                if item[:deleted]
+                    i = Item.first(id: item_id).destroy
+                    next
+                end
+                    i = Item.first(id: item_id)
+                if i.nil?
+                    Item.new(
+                        name: item["name"], 
+                        description: item[:description], 
+                        list: list, 
+                        user: user, 
+                        created_at: Time.now, 
+                        updated_at: Time.now)
+                else
+                    
+                    name = item["name"]
+                    i.name = name  
+                    i.description = item["description"]
+                    i.updated_at = Time.now 
+                    item["starred"] ? i.starred = 1 : i.starred = 0
+                    y, m, d = item["date"].split("-") if item["date"]
+                    duedate = Time.utc(y,m,d) if y 
+                    i.due_date = duedate if duedate && duedate > Time.now
+                     
+                    i.save
+                end
             end
         end
     end
@@ -88,6 +110,21 @@ class Item < Sequel::Model
     	 
     many_to_one :user 
     many_to_one :list 
+
+
+    def before_validation
+        self.created_at ||= Time.now
+    
+    end
+    
+    def validate
+        super
+        validates_presence [:name, :created_at]
+        validates_format /\A[A-Za-z]*\Z/, :name, message: 'is not a valid name'
+        validates_min_length 3, :name
+        validates_max_length 20, :name
+    end
+
 end
 
 =begin

@@ -6,7 +6,6 @@ before do
     @user = User.first(id: session[:user_id]) if session[:user_id]
 end
 
-
 get '/?' do 
   
     if session[:user_id].nil?
@@ -20,7 +19,6 @@ get '/?' do
    
 end
 
-
 get '/list/:id' do 
   
     if session[:user_id].nil?
@@ -28,31 +26,39 @@ get '/list/:id' do
     else
         all_lists = List.all 
         @user = User.first(id: session[:user_id])
-        @list = List.first(id: params[:id])
-        slim :list_detail
+        list = List.first(id: params[:id])
+        items= Item.where(list_id: params[:id]).order(Sequel.desc(:starred))  
+        slim :list_detail, locals:{list:list,items:items}
     end
    
 end
 
-
 get '/comment/delete/:id' do
     commentId = params[:id]
-    #Comment.delete_comment commentId
     comment = Comment.first(id: commentId).destroy
     redirect "http://localhost:4567/"
 end
 
 get '/new/?' do 
     # show create list page 
-   
+    @list = List.new
     slim :new_list
 end 
 
 post '/new/?' do
     # create a list
     @user = User.first(id: session[:user_id])
-    list = List.new_list params[:name], params[:items], @user
-    redirect "/"
+    @list = List.new_list params[:name], params[:items], @user
+    if @list.id
+        listID = @list.id
+    end
+   
+    if listID
+        redirect "http://localhost:4567/list/#{listID}"
+    else
+        slim :new_list
+    end
+   
 end
 
 get '/edit/:id/?' do 
@@ -72,15 +78,8 @@ get '/edit/:id/?' do
     end
 
     if can_edit
-        #items_sorted = List.first(id: params[:id]).items_dataset.order(Sequel.desc(:starred))   
-        #dataset.order(:kind) # kind
-        #dataset.reverse(:kind) # kind DESC
-        #dataset.order(Sequel.desc(:kind), :name) # kind DESC, name
-        items_sorted = list.items.sort_by{ |item| item[:starred] ? 0 : 1}
-        #items_sorted = list.items_dataset.select_order_map(:checked).reverse
-        #items_sorted = list.items_dataset.order(Sequel.desc(:starred))
-        #binding.pry
-        slim :edit_list, locals: {list: list, items: items_sorted}
+        items= Item.where(list_id: params[:id]).order(Sequel.desc(:starred)) 
+        slim :edit_list, locals: {list: list, items: items}
     else
         slim :error, locals: {error: 'Invalid permissions'}
     end
@@ -149,30 +148,34 @@ post '/permission/?' do
                     updated_at: Time.now)
             end
         end
-    
         redirect request.referer
     else
         slim :error, locals: {error: 'Invalid permissions'}
     end
 end 
 
-get '/signup/?' do 
-
+get '/signup/?' do
+    @user = User.new #user will be empty but not nil -> so there will be no error in signup template when asking for @user
     if session[:user_id].nil?
-        slim :signup
+      slim :signup
     else
-        slim :error, locals: {error: 'Please log out first'}
-    end 
-end 
+      redirect '/logout'
+    end
+end
 
 post '/signup/?' do
     md5sum = Digest::MD5.hexdigest params[:password]
-    User.create(name: params[:name], password: md5sum)
-    redirect '/login'
-end 
+    @user = User.new(name: params[:name], password: md5sum)
+    if @user.save
+      session[:user_id] = @user.id
+      puts "signup worked"
+      redirect '/login'
+    else
+      slim :signup
+    end
+  end
 
 get '/login/?' do 
-  
     if session[:user_id].nil?
       slim :login
     else
@@ -184,13 +187,11 @@ end
 post '/login/?' do 
     
     md5sum = Digest::MD5.hexdigest params[:password]
-    user = User.first(name: params[:name], password: md5sum)
-    if user.nil?
-        
+    @user = User.first(name: params[:name], password: md5sum)
+    if @user.nil?   
       slim :error, locals: {error: 'Invalid login credentials'}
     else
-     
-      session[:user_id] = user.id
+      session[:user_id] = @user.id
       redirect '/'
     end
 end

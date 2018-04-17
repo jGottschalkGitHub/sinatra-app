@@ -1,3 +1,23 @@
+css:
+
+    .help-block{
+        margin-left: 20px;
+        margin-right: 20px;
+        padding: 10px;
+        border: solid 1px green;
+        border-radius: 3px;
+        color: green;
+    }
+     .has-errors .help-block{
+        margin-left: 20px;
+        margin-right: 20px;
+        padding: 10px;
+        border: solid 1px red;
+        border-radius: 3px;
+        color: red;
+    }
+
+
 .col-md-8.col-md-offset-2
     .has-below
     .has-below
@@ -20,10 +40,13 @@
                     .col-md-8
                         textarea.form-control type="text" name="items[][description]" placeholder="Item description"
                 #items_list.form-group
-                    a href='javascript:void(0)' id='add-item' class='col-md-3' Add Item
+                    - name_errors = @list.errors.on(:name) || []
+                    div class=("has-errors" if name_errors.any?)
+                        .help-block = name_errors.any? ? name_errors.join(', ') : "All names need to be between 3 and 20 characters"  
+                        a href='javascript:void(0)' id='add-item' class='col-md-3' Add Item
                 hr
                 .form-group
-                    .col-md-2.col-md-offset-3
+                    .col-md-1.col-md-offset-11
                         button.btn.btn-sm.btn-primary type="submit"
                             i.glyphicon.glyphicon-ok
                             Create
@@ -31,9 +54,9 @@
 script type="text/template" id='item_template'
     .form-group.item-group
         .col-md-4
-        input.form-control type="text" name="items[][name]" placeholder="Item name"
+            input.form-control type="text" name="items[][name]" placeholder="Item name"
         .col-md-8
-        textarea.form-control type="text" name="items[][description]" placeholder="Item description"
+            textarea.form-control type="text" name="items[][description]" placeholder="Item description"
 
 
 javascript:

@@ -10,7 +10,21 @@ css:
         position: relative;
         top: 5px;
     }
-
+    .delete_items input[type=checkbox]{
+        position: relative;
+        top: 20px;
+    }
+     .delete_items::after{
+        color: red;
+        content:"X";
+        font-weight: bold; 
+        width: 30px;
+        height: 30px;
+        font-size: 20px;
+        position: absolute;
+        top: 16px;
+        left: 40px;   
+    }
 
 
 .col-md-8.col-md-offset-2
@@ -46,15 +60,13 @@ css:
                         .col-md-2
                             label Due Date
                             - if item.due_date
-                                //- date, waste = item.due_date.to_s.split(" ")
-                                //- y,m,d = date.split("-")
-                                //- date = "#{y}/#{m}/#{d}
-                                //p "#{time_now}" 
                                 // 2018-04-05 Format needed for min
                                 - curr_time = Time.now.strftime('%Y-%m-%d')
                                 input type="date" name="items[]date" min="#{curr_time}" value="#{item.due_date&.strftime('%Y-%m-%d')}"
                             -else 
-                                input type="date" name="items[]date" min="#{curr_time}" value=""
+                                input type="date" name="items[]date" min="#{curr_time}" value=""f
+                        .col-md-1.col-md-offset-1.delete_items
+                            input type="checkbox" name="items[][deleted]" checked=false
                 hr
                 .form-group
                 .col-md-12.col-md-offset-10

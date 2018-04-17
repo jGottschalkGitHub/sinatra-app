@@ -39,7 +39,7 @@ css:
     .has-below
     .panel.panel-primary
         .panel-heading
-            h3.panel-title #{@list.name}
+            h3.panel-title #{list.name}
         .panel-body
             div
                 .row.titles.col-md-12
@@ -52,7 +52,7 @@ css:
                     .col-md-3
                         h4 Duedate
             
-                - @list.items.each do |item|
+                - items.each do |item|
                     .row.items.col-md-12
                         div 
                             .col-md-1
@@ -75,4 +75,4 @@ css:
                 
 .col-md-8.col-md-offset-8
     .row.items.col-md-12
-        a class="button edit" href="/edit/#{@list.id}" Edit           
+        a class="button edit" href="/edit/#{list.id}" Edit           
