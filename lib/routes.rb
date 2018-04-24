@@ -45,9 +45,11 @@ post '/new/?' do
   @user = User.first(id: session[:user_id])
   @list = List.new_list params[:name], params[:items], @user
   list_id = @list.id if @list.id
-  if listID
+  if list_id
+    flash.next[:success] = "List '#{@list.name}' has been created"
     redirect "http://localhost:4567/list/#{list_id}"
   else
+    flash.now[:danger] = "List '#{@list.name}' could not be created"
     slim :new_list
   end
 end
@@ -99,15 +101,16 @@ post '/edit/?' do
     end
   end
   if rerenderscript
+    flash.now[:danger] = "List '#{@list.name}' could not be updated"
     slim :edit_list, locals: { list: @list, items: @items, newitems: newitems }
   else
     return_value = List.edit_list @listid, @listname, params[:items], user
     @errors = return_value.errors if return_value.errors
-    puts @errors
     if !@errors.empty?
+      flash.now[:danger] = "List '#{@list.name}' could not be updated"
       slim :edit_list, locals: { list: @list, items: @items, newitems: newitems }
     else
-      flash.next[:success] = "List '#{@list.name}' has been created"
+      flash.next[:success] = "List '#{@list.name}' has been updated"
       redirect "http://localhost:4567/list/#{@listid}"
     end
   end
