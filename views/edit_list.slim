@@ -25,6 +25,14 @@ css:
         top: 16px;
         left: 40px;   
     }
+    .help-block{ 
+        width: 300px;
+        border:solid 1px #cc0000;
+        border-radius: 3px;
+        padding: 5px;
+        background-color: #cc0000;
+        color: #ffffff;
+    }
 
 
 .col-md-8.col-md-offset-2
@@ -37,47 +45,70 @@ css:
                 .form-group
                     label.control-label.col-md-4 for="name" List ID
                     .col-md-4
-                        input.form-control type="text" name="id" value="#{list.id}" read_only=true
+                        input.form-control type="text" name="id" value="#{@list.id}" read_only=true
                 .form-group
                     label.control-label.col-md-4 for="id" List Name
                     .col-md-4
-                        input.form-control type="text" name="name" value="#{list.name}" placeholder="#{list.name}"
+                        input.form-control type="text" name="name" value="#{@list.name}" placeholder="#{@list.name}"
                 hr
-                - items.each do |item|
-                   .form-group.item-group
-                        .col-md-1
-                             - if item.starred
-                                input type="checkbox" name="items[][starred]" checked=true
-                             - else
-                                input type="checkbox" name="items[][starred]" checked=false
-                        .col-md-1
-                            input.form-control type="text" name="items[][id]" value="#{item.id}"
-                        .col-md-3
-                            input.form-control type="text" name="items[][name]" value="#{item.name}" placeholder="#{item.name}"
-                        .col-md-3
-                            textarea.form-control type="text" name="items[]description" value="#{item.description}" placeholder="#{item.description}"  #{item.description}
-                                               
-                        .col-md-2
-                            label Due Date
-                            - if item.due_date
-                                // 2018-04-05 Format needed for min
-                                - curr_time = Time.now.strftime('%Y-%m-%d')
-                                input type="date" name="items[]date" min="#{curr_time}" value="#{item.due_date&.strftime('%Y-%m-%d')}"
-                            -else 
-                                input type="date" name="items[]date" min="#{curr_time}" value=""f
-                        .col-md-1.col-md-offset-1.delete_items
-                            input type="checkbox" name="items[][deleted]" checked=false
+                - @items.each do |item|
+                    - p item
+                    - binding.pry
+                    .form-group.item-group
+                            .col-md-1
+                                - if item.starred
+                                    input type="checkbox" name="items[][starred]" checked=true
+                                - else
+                                    input type="checkbox" name="items[][starred]" checked=false
+                            .col-md-1
+                                input.form-control type="text" name="items[][id]" value="#{item.id}"
+                            .col-md-3
+                                input.form-control type="text" name="items[][name]" value="#{item.name}" placeholder="#{item.name}"
+                            .col-md-3
+                                textarea.form-control type="text" name="items[]description" value="#{item.description}" placeholder="#{item.description}"  #{item.description}
+                                                
+                            .col-md-2
+                                label Due Date
+                                - if item.due_date
+                                    // 2018-04-05 Format needed for min
+                                    - curr_time = Time.now.strftime('%Y-%m-%d')
+                                    input type="date" name="items[]date" min="#{curr_time}" value="#{item.due_date&.strftime('%Y-%m-%d')}"
+                                - else 
+                                    input type="date" name="items[]date" min="#{curr_time}" value=""
+                            .col-md-1.col-md-offset-1.delete_items
+                                input type="checkbox" name="items[][deleted]" checked=false
+                    
+                - unless newitems.empty?
+                   - newitems.each do |newitem|
+                    == slim :"/_additem", locals: {newitem: newitem}
+
+                div id="items_list"
                 hr
                 .form-group
                 .col-md-12.col-md-offset-10
                     button.btn.btn-sm.btn-primary type= "submit" SAVE
-                        
-                        
+                    a href='javascript:void(0)' id='add-item2' class='col-md-3' Add Item
+            - puts @new_item_errors
+            //- name_errors.concat(@new_item_errors) if @new_item_errors
+            - if @errors.any?
+                - name_errors = @errors[0].on(:name) || []
+                .help-block = name_errors.any? ? name_errors.join(', ') : "All names need to be between 3 and 20 characters"  
 
+script type="text/template" id='item_template2'
+    .form-group.item-group
+          
+            .col-md-4
+                input.form-control type="text" name="items_new[][name]" placeholder="Item name"
+            .col-md-8
+                textarea.form-control type="text" name="items_new[][description]" placeholder="Item description"
+        
 javascript:
-    document.addEventListener('DOMContentLoaded', function() {  
-        $( function() {
-            $( ".datepicker" ).datepicker();
-        });
-    });
+    document.addEventListener('DOMContentLoaded', function() {
+    
+    $(document).on('click', '#add-item2', function(){
+            
+            var template_text = $('#item_template2').html()
+            $('#items_list').after(template_text);
+            });
+        });                        
   

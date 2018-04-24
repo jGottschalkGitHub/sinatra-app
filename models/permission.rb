@@ -1,6 +1,5 @@
-require 'sequel' 
-	 
-class Permission < Sequel::Model 
-    many_to_one :user 
-    many_to_one :list 
+require 'sequel'
+class Permission < Sequel::Model
+  many_to_one :user
+  many_to_one :list
 end
