@@ -54,18 +54,19 @@ html
                   a.navbar-brand href= url('/new')
                     i.glyphicon.glyphicon-plus
                                      
-        .has-below
-        .has-below
-        .has-below
-        .has-below
-        .has-below
-        .has-below
+          .has-below
+          .has-below
+          .has-below
+          .has-below
+          .has-below
+          .has-below
+        .row
+          - (flash || {}).each do |key, message|
+            div class=("alert alert-#{key}")
+              = message
         .row
           == yield
 
 
       .col-md-12.myfooter
         == slim :"/_footer"
-  
-
-

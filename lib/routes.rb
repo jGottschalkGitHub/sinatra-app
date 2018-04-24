@@ -107,6 +107,7 @@ post '/edit/?' do
     if !@errors.empty?
       slim :edit_list, locals: { list: @list, items: @items, newitems: newitems }
     else
+      flash.next[:success] = "List '#{@list.name}' has been created"
       redirect "http://localhost:4567/list/#{@listid}"
     end
   end

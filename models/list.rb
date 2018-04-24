@@ -66,7 +66,6 @@ class List < Sequel::Model
     list = List.first(id: id)
     # list.name = name
     # list.updated_at = Time.now
-    booli = true
     list.name = name if name
     # list.new? ? list.save : list.save(validate: false)
     list.save
