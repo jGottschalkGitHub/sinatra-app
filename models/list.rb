@@ -39,8 +39,9 @@ class List < Sequel::Model
     Permission.where(list_id: list_id).delete
     List.where(list_id: list_id).delete
   end
-  #this is an instance method called on the instance of List that we are in
-  #use instead of self.delete_list
+  # this is an instance method called on the instance of List that we are in
+  # use instead of self.delete_list
+
   def before_destroy
     items.each(&:destroy)
     permissions.each(&:destroy)
@@ -54,7 +55,7 @@ class List < Sequel::Model
 
   def validate
     super
-    validates_presence [:name, :created_at]
+    validates_presence %i[name created_at]
     validates_format /\A[A-Za-z\s]*\Z/, :name, message: 'is not a valid name'
     validates_min_length 3, :name
     validates_max_length 20, :name
@@ -63,11 +64,11 @@ class List < Sequel::Model
 
   def self.edit_list(id, name, items, user)
     list = List.first(id: id)
-    ##list.name = name
-    #list.updated_at = Time.now
+    # list.name = name
+    # list.updated_at = Time.now
     booli = true
     list.name = name if name
-    #list.new? ? list.save : list.save(validate: false)
+    # list.new? ? list.save : list.save(validate: false)
     list.save
     return list unless list.save
     items.each do |item|

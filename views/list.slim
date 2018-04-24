@@ -113,6 +113,9 @@ css:
         color: #ffffff;
         padding-left: 20px; 
     }
+    .row.buttontoggle{ padding-left: 40px; }
+    .row.buttontoggle i{ font-size: 22px }
+    .row.buttontoggle i:hover{ cursor:pointer }
 
 
 .col-md-12
@@ -135,7 +138,9 @@ css:
                                 textarea value="" name="comment" placeholder="Comment"
                             .col-md-4.list_comment.col-md-offset 
                                 button class="save" type="submit" save                
-                .row
+                .row.buttontoggle
+                    i.glyphicon.glyphicon-menu-down
+                .row.togglerow
                     .col-md-12.comments
                         - list.comments.each do |comment|
                             .row.one-comment
@@ -152,3 +157,11 @@ css:
                 button.btn.btn-sm.btn-primary
                     a href="/new" Add List
 
+javascript:
+    document.addEventListener('DOMContentLoaded', function() {
+        $('.togglerow').hide();
+        $(document).on('click', '.buttontoggle i', function(){
+            $('.togglerow').toggle(500);
+            
+        }); 
+    });  

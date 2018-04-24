@@ -25,8 +25,9 @@ css:
         top: 16px;
         left: 40px;   
     }
-    .help-block{ 
+    .has-errors .help-block{ 
         width: 300px;
+        height: 100px;
         border:solid 1px #cc0000;
         border-radius: 3px;
         padding: 5px;
@@ -52,8 +53,6 @@ css:
                         input.form-control type="text" name="name" value="#{@list.name}" placeholder="#{@list.name}"
                 hr
                 - @items.each do |item|
-                    - p item
-                    - binding.pry
                     .form-group.item-group
                             .col-md-1
                                 - if item.starred
@@ -80,7 +79,7 @@ css:
                     
                 - unless newitems.empty?
                    - newitems.each do |newitem|
-                    == slim :"/_additem", locals: {newitem: newitem}
+                    == slim :"/_additem", locals: { newitem: newitem }
 
                 div id="items_list"
                 hr
@@ -90,9 +89,12 @@ css:
                     a href='javascript:void(0)' id='add-item2' class='col-md-3' Add Item
             - puts @new_item_errors
             //- name_errors.concat(@new_item_errors) if @new_item_errors
-            - if @errors.any?
-                - name_errors = @errors[0].on(:name) || []
-                .help-block = name_errors.any? ? name_errors.join(', ') : "All names need to be between 3 and 20 characters"  
+            - unless @in_get || @errors.empty?
+                - binding.pry
+                - puts @errors
+                - name_errors = @errors.on(:name) || []
+                div class=("has-errors" if name_errors.any?)
+                    .help-block = name_errors.join(', ') if name_errors.any? 
 
 script type="text/template" id='item_template2'
     .form-group.item-group

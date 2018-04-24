@@ -1,5 +1,19 @@
+css:
+    .newitem_errorblock{
+        background-color: red;
+        color: white;
+        width: 200px;
+        height: 50px;
+    }
+
 .form-group.item-group        
   .col-md-4
       input.form-control type="text" name="items_new[][name]" value="#{newitem["name"]}" placeholder="#{newitem["name"]}"
   .col-md-8
       textarea.form-control type="text" name="items_new[][description]" value="#{newitem["description"]}" placeholder="#{newitem["description"]}"
+
+- unless @in_get
+    - unless @new_item_errors.empty?
+        - puts @new_item_errors
+        - new_item_name_error = @new_item_errors.on(:name) || []
+        .newitem_errorblock = new_item_name_error.join(', ')

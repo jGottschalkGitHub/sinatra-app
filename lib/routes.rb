@@ -53,9 +53,9 @@ post '/new/?' do
 end
 
 get '/edit/:id/?' do
-  # check user permission and show the edit page 
+  # check user permission and show the edit page
   @list = List.first(id: params[:id])
-  @errors = []
+  @in_get = true
   can_edit = true
   if @list.nil?
     can_edit = false
@@ -63,9 +63,7 @@ get '/edit/:id/?' do
   elsif @list.shared_with == 'public'
     user = User.first(id: session[:user_id])
     permission = Permission.first(list: @list, user: user)
-    if permission.nil? or permission.permission_level == 'read_only'
-      can_edit = false
-    end
+    can_edit = false if permission.nil? || permission.permission_level == 'read_only'
   end
 
   if can_edit
@@ -78,21 +76,20 @@ end
 
 post '/edit/?' do
   rerenderscript = false
+  @in_get = false
   @listid = params[:id]
   @listname = params[:name]
   @list = List.first(id: @listid)
   @items = Item.where(list_id: params[:id]).order(Sequel.desc(:starred))
-  #items_id=params.select {|c| c.to_s =~ /^item/ }
-  #items_desc=params.select{|c| c.to_s =~ /^description/ }
-  userid = session[:user_id]
+  # items_id=params.select {|c| c.to_s =~ /^item/ }
+  # items_desc=params.select{|c| c.to_s =~ /^description/ }
   user = User.first(id: session[:user_id])
   newitems = []
-  @errors = []
+  @errors = {}
   newitems = params[:items_new] if params[:items_new]
   @new_item_errors = {}
   if newitems
     newitems.each do |item|
-      binding.pry
       new_item = Item.new(name: item[:name], description: item[:description], list: @list, user: @user)
       new_item.save if new_item.valid?
       unless new_item.errors.empty?
@@ -105,15 +102,9 @@ post '/edit/?' do
     slim :edit_list, locals: { list: @list, items: @items, newitems: newitems }
   else
     return_value = List.edit_list @listid, @listname, params[:items], user
-    # if (defined?(return_value.items)) == 'local-variable'
-    # if return_value.instance_of? List
-    #  @items = return_value.items
-    # elsif return_value.instance_of? Item
-    #  @items = return_value
-    # end
     @errors = return_value.errors if return_value.errors
-    binding.pry
-    if @errors.any?
+    puts @errors
+    if !@errors.empty?
       slim :edit_list, locals: { list: @list, items: @items, newitems: newitems }
     else
       redirect "http://localhost:4567/list/#{@listid}"
@@ -137,9 +128,7 @@ post '/permission/?' do
     can_change_permission = false
   elsif list.shared_with != 'public'
     permission = Permission.first(list: list, user: user)
-    if permission.nil? or permission.permission_level == 'read_only'
-      can_change_permission = false
-    end
+    can_change_permission = false if permission.nil? || permission.permission_level == 'read_only'
   end
   if can_change_permission
     list.permission = params[:new_permissions]
@@ -147,7 +136,7 @@ post '/permission/?' do
     current_permissions = Permission.first(list: list)
     permissions.each(&:destroy)
     current_permissions.each(&:destroy)
-    if params[:new_permissions] == 'private' or parms[:new_permissions] == 'shared'
+    if params[:new_permissions] == 'private' || params[:new_permissions] == 'shared'
       user_perms.each do |perm|
         u = User.first(perm[:user])
         Permission.create(
@@ -166,7 +155,7 @@ post '/permission/?' do
 end
 
 get '/signup/?' do
-  @user = User.new #user will be empty but not nil -> so there will be no error in signup template when asking for @user
+  @user = User.new
   if session[:user_id].nil?
     slim :signup
   else
@@ -189,7 +178,7 @@ get '/login/?' do
   if session[:user_id].nil?
     slim :login
   else
-    slim :login
+    redirect '/'
   end
 end
 
@@ -206,8 +195,8 @@ end
 
 get '/delete/:id/?' do
   id = params[:id]
-  #list = List.delete_list id
-  #getting instance of List and calling destroy on it -> will activate destroy hook
+  # list = List.delete_list id
+  # getting instance of List and calling destroy on it -> will activate destroy hook
   List.first(id: id).destroy
   redirect 'http://localhost:4567/'
 end
