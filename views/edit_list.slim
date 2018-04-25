@@ -26,56 +26,53 @@ css:
         left: 40px;   
     }
     .has-errors .help-block{ 
-        width: 300px;
-        height: 100px;
-        border:solid 1px #cc0000;
+        color: red;
+        border: solid 1px red;
         border-radius: 3px;
-        padding: 5px;
-        background-color: #cc0000;
-        color: #ffffff;
+        padding: 10px;
     }
 
 
 .col-md-8.col-md-offset-2
-    .has-below
-    .panel.panel-primary
-        .panel-heading
-            h3.panel-title Edit List
+  .has-below
+  .panel.panel-primary
+      .panel-heading
+        h3.panel-title Edit List
         .panel-body
             form.form-horizontal name="list" method="post" action= url("/edit")
-                .form-group
-                    label.control-label.col-md-4 for="name" List ID
+              .form-group
+                  label.control-label.col-md-4 for="name" List ID
                     .col-md-4
-                        input.form-control type="text" name="id" value="#{@list.id}" read_only=true
-                .form-group
-                    label.control-label.col-md-4 for="id" List Name
-                    .col-md-4
-                        input.form-control type="text" name="name" value="#{@list.name}" placeholder="#{@list.name}"
-                hr
-                - @items.each do |item|
-                    .form-group.item-group
+                      input.form-control type="text" name="id" value="#{@list.id}" read_only=true
+              .form-group
+                label.control-label.col-md-4 for="id" List Name
+                  .col-md-4
+                    input.form-control type="text" name="name" value="#{@list.name}" placeholder="#{@list.name}"
+              hr
+              - @items.each do |item|
+                .form-group.item-group
                             .col-md-1
-                                - if item.starred
-                                    input type="checkbox" name="items[][starred]" checked=true
-                                - else
-                                    input type="checkbox" name="items[][starred]" checked=false
-                            .col-md-1
-                                input.form-control type="text" name="items[][id]" value="#{item.id}"
-                            .col-md-3
-                                input.form-control type="text" name="items[][name]" value="#{item.name}" placeholder="#{item.name}"
-                            .col-md-3
-                                textarea.form-control type="text" name="items[]description" value="#{item.description}" placeholder="#{item.description}"  #{item.description}
-                                                
-                            .col-md-2
-                                label Due Date
-                                - if item.due_date
-                                    // 2018-04-05 Format needed for min
-                                    - curr_time = Time.now.strftime('%Y-%m-%d')
-                                    input type="date" name="items[]date" min="#{curr_time}" value="#{item.due_date&.strftime('%Y-%m-%d')}"
-                                - else 
-                                    input type="date" name="items[]date" min="#{curr_time}" value=""
-                            .col-md-1.col-md-offset-1.delete_items
-                                input type="checkbox" name="items[][deleted]" checked=false
+                            - if item.starred
+                                input type="checkbox" name="items[][starred]" checked=true
+                            - else
+                              input type="checkbox" name="items[][starred]" checked=false
+                          .col-md-1
+                              input.form-control type="text" name="items[][id]" value="#{item.id}"
+                          .col-md-3
+                              input.form-control type="text" name="items[][name]" value="#{item.name}" placeholder="#{item.name}"
+                          .col-md-3
+                              textarea.form-control type="text" name="items[]description" value="#{item.description}" placeholder="#{item.description}"  #{item.description}
+                                              
+                          .col-md-2
+                            label Due Date
+                            - if item.due_date
+                                  // 2018-04-05 Format needed for min
+                                - curr_time = Time.now.strftime('%Y-%m-%d')
+                                input type="date" name="items[]date" min="#{curr_time}" value="#{item.due_date&.strftime('%Y-%m-%d')}"
+                              - else 
+                                input type="date" name="items[]date" min="#{curr_time}" value=""
+                          .col-md-1.col-md-offset-1.delete_items
+                            input type="checkbox" name="items[][deleted]" checked=false
                     
                 - unless newitems.empty?
                    - newitems.each do |newitem|
@@ -85,32 +82,29 @@ css:
                 hr
                 .form-group
                 .col-md-12.col-md-offset-10
-                    button.btn.btn-sm.btn-primary type= "submit" SAVE
-                    a href='javascript:void(0)' id='add-item2' class='col-md-3' Add Item
+                  button.btn.btn-sm.btn-primary type= "submit" SAVE
+                  a href='javascript:void(0)' id='add-item2' class='col-md-3' Add Item
             - puts @new_item_errors
             //- name_errors.concat(@new_item_errors) if @new_item_errors
             - unless @in_get || @errors.empty?
-                - binding.pry
-                - puts @errors
-                - name_errors = @errors.on(:name) || []
+              - name_errors = @errors.on(:name) || []
                 div class=("has-errors" if name_errors.any?)
-                    .help-block = name_errors.join(', ') if name_errors.any? 
+                  .help-block = name_errors.join(', ') if name_errors.any? 
 
 script type="text/template" id='item_template2'
-    .form-group.item-group
-          
-            .col-md-4
-                input.form-control type="text" name="items_new[][name]" placeholder="Item name"
-            .col-md-8
-                textarea.form-control type="text" name="items_new[][description]" placeholder="Item description"
+  .form-group.item-group
         
+          .col-md-4
+              input.form-control type="text" name="items_new[][name]" placeholder="Item name"
+          .col-md-8
+              textarea.form-control type="text" name="items_new[][description]" placeholder="Item description"
+      
 javascript:
-    document.addEventListener('DOMContentLoaded', function() {
-    
-    $(document).on('click', '#add-item2', function(){
-            
-            var template_text = $('#item_template2').html()
-            $('#items_list').after(template_text);
-            });
-        });                        
+  document.addEventListener('DOMContentLoaded', function() {
   
+  $(document).on('click', '#add-item2', function(){
+      
+      var template_text = $('#item_template2').html()
+      $('#items_list').before(template_text);
+      });
+  });                        

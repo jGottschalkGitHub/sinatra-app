@@ -5,6 +5,7 @@ css:
         padding-top: 40px;
         padding-bottom: 40px;
     }
+    .row{ margin-right: 0 }
     .col-md-12.row{
         width: 100%;
         height: 50px;
@@ -28,12 +29,10 @@ css:
          -moz-box-shadow:    3px 3px 5px 5px #2052a3;
         -webkit-box-shadow: 3px 3px 5px 5px #2052a3;
         box-shadow:         3px 3px 5px 5px #2052a3;
-
     }
-
-
-
-
+    .col-md-12.wrapper .row.onelist{
+        min-height: 100px;
+    }
     h1{
         margin-bottom: 25px;
         margin-left: 30px;
@@ -56,20 +55,14 @@ css:
         color: #ffffff;
         border-color: #434444;
         border-radius: 3px;
-        position:relative;
-        left: -20px;
-        top: 25px;
-
     }
     a.delete_button{
-        background-color: #dd1137;
+        background-color: #c10b0b;
         color: #ffffff;
         width: 80px;
         height: 40px;
         padding: 10px 17px 10px 17px;
         border-radius: 3px;
-        position: relative;
-        bottom: -40px;
     }
 
     .list_edit a{
@@ -102,10 +95,20 @@ css:
         min-height: 40px;
         padding-left: 30px;
         position:relative;
+        margin-bottom: 15px;
     }
     textarea{
         padding: 5px;
         border-radius: 3px;
+    }
+    .list_link{
+        display: inline-block;
+        width: 45%
+    }
+     .list_edit{
+         
+        display: inline-block;
+        width: 15%
     }
     .list_link a{
         
@@ -113,44 +116,86 @@ css:
         color: #ffffff;
         padding-left: 20px; 
     }
+    .list_delete{
+        display: inline-block;
+        width: 15%
+    }
+    .list_comment {
+        display: inline-block;
+        width: 20%
+    }
+    .list_text{
+        display: inline-block;
+    }
+    .list_button{
+        display: inline-block;
+        width: 10%
+    }
+    form[name=comments]{
+        position: relative;
+        top: 55px;
+        margin-bottom: 69px;
+    }
+
     .row.buttontoggle{ padding-left: 40px; }
     .row.buttontoggle i{ font-size: 22px }
     .row.buttontoggle i:hover{ cursor:pointer }
 
+    @media only screen and (max-width: 600px) {
+        .row.one-comment{ margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 10px; }
+        .row.mylists{ width: 100% }
+        .col-md-12.wrapper{ width: 100%; padding-left: 40px; }
+        button.save{ position: relative; left: 0; top: 0; }
+        .list_delete, .list_link, .list_edit{
+            display: block;
+            width: 100%;
+            min-height: 60px;
+            position: relative;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom:0;
+        }
+        .list_comment{
+            position: relative;
+            top: -50px;
+        }
+        .list_link a{ padding-left:0 }
+    }
 
 .col-md-12
-    .row.mylists
+    .row.mylists data-listmodifiedid="#{list_modified_id}"
         h1 Lists
         .col-md-12.wrapper
             - list.each_with_index do |list,i|
-                .row
-                    .col-md-3.list_link 
+                .row.onelist
+                    .list_link 
                         a href= "list/#{list.id}" 
                             = list.name
-                    .col-md-2.list_edit 
+                    .list_edit 
                         a href= "edit/#{list.id}" Edit
-                    .col-md-2.list_delete
+                    .list_delete
                         a href= "delete/#{list.id}" Delete
 
-                    .col-md-5.list_comment
+                    .list_comment
                         form method="post" name="comments" action= url("/comment/#{list.id}")
-                            .col-md-8.list_comment
+                            .list_text
                                 textarea value="" name="comment" placeholder="Comment"
-                            .col-md-4.list_comment.col-md-offset 
+                            .list_button 
                                 button class="save" type="submit" save                
-                .row.buttontoggle
-                    i.glyphicon.glyphicon-menu-down
-                .row.togglerow
-                    .col-md-12.comments
-                        - list.comments.each do |comment|
-                            .row.one-comment
-                                .col-md-8.commentbox
-                                    p #{comment.text}
+                - if !list.comments.empty?
+                    .row.buttontoggle
+                        i.glyphicon.glyphicon-menu-down data-toggleid= "#{list.id}"
+                    .row.togglerow id="#{list.id}"
+                        .comments
+                            - list.comments.each do |comment|
+                                .row.one-comment
+                                    .commentbox
+                                        p #{comment.text}
 
-                                .col-md-4
-                                    
-                                    - if comment.editable? @user
-                                        a class="delete_button" href="/comment/delete/#{comment.id}" delete
+                                    div
+                                        - if comment.editable? @user
+                                            a class="delete_button" href="/comment/delete/#{comment.id}" delete
                             
                 hr           
             .col-md-12.col-md-offset-8
@@ -159,9 +204,22 @@ css:
 
 javascript:
     document.addEventListener('DOMContentLoaded', function() {
-        $('.togglerow').hide();
+        $('.togglerow').hide()
+        let list_modified_id = $('.row.mylists').data('listmodifiedid')
+
+        
+        if(list_modified_id != ''){ 
+            var element = document.getElementById(list_modified_id)
+            $(element).toggle(500)
+            $('html, body').animate({
+                scrollTop: $(element).offset().top
+            }, 1000);
+            
+            
+        }
         $(document).on('click', '.buttontoggle i', function(){
-            $(this).toggle(500);
+            let toggleid = $(this).data( 'toggleid' )
+            $('.togglerow#' + toggleid).toggle(500)
             
         }); 
     });  

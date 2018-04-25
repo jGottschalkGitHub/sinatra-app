@@ -1,37 +1,14 @@
-
 before do
   if !%w[login signup].include?(request.path_info.split('/')[1]) && session[:user_id].nil? && !request.post?
     redirect '/login'
   end
-  @user = User.first(id: session[:user_id]) if session[:user_id]
+  @user = current_user
 end
 
-get '/?' do
-  if session[:user_id].nil?
-    slim :error
-  else
-    # all_lists =  List.all
-    @user = User.first(id: session[:user_id])
-    all_lists = List.association_join(:permissions).where(user_id: @user.id)
-    slim :list, locals: { list: all_lists }
+helpers do
+  def current_user
+    @current_user ||= User.first(id: session[:user_id]) if session[:user_id]
   end
-end
-
-get '/list/:id' do
-  if session[:user_id].nil?
-    slim :error
-  else
-    # all_lists = List.all
-    @user = User.first(id: session[:user_id])
-    list = List.first(id: params[:id])
-    items = Item.where(list_id: params[:id]).order(Sequel.desc(:starred))
-    slim :list_detail, locals: { list: list, items: items }
-  end
-end
-
-get '/comment/delete/:id' do
-  Comment.first(id: params[:id]).destroy
-  redirect 'http://localhost:4567/'
 end
 
 get '/new/?' do
@@ -40,14 +17,42 @@ get '/new/?' do
   slim :new_list
 end
 
+get '/list/:id' do
+  if session[:user_id].nil?
+    slim :error
+  else
+    # all_lists = List.all
+    @user = current_user
+    list = List.first(id: params[:id])
+    items = Item.where(list_id: params[:id]).order(Sequel.desc(:starred))
+    slim :list_detail, locals: { list: list, items: items }
+  end
+end
+
+get '/comment/delete/:id' do
+  Comment.first(id: params[:id]).destroy
+  flash.next[:success] = 'Comment has been deleted'
+  redirect '/'
+end
+
 post '/new/?' do
   # create a list
-  @user = User.first(id: session[:user_id])
-  @list = List.new_list params[:name], params[:items], @user
+  @user = current_user
+  items = params[:items]
+  @list = List.new_list params[:name], items, @user
   list_id = @list.id if @list.id
   if list_id
+    if items
+      items.each do |item|
+        new_item = Item.new(name: item[:name], description: item[:description],list: @list, user: @user)
+        new_item.save if new_item.valid?
+        unless new_item.errors.empty?
+          flash.next[:danger] = "Item could not be created"
+        end
+      end
+    end 
     flash.next[:success] = "List '#{@list.name}' has been created"
-    redirect "http://localhost:4567/list/#{list_id}"
+    redirect "/list/#{list_id}"
   else
     flash.now[:danger] = "List '#{@list.name}' could not be created"
     slim :new_list
@@ -61,7 +66,6 @@ get '/edit/:id/?' do
   can_edit = true
   if @list.nil?
     can_edit = false
-
   elsif @list.shared_with == 'public'
     user = User.first(id: session[:user_id])
     permission = Permission.first(list: @list, user: user)
@@ -70,7 +74,7 @@ get '/edit/:id/?' do
 
   if can_edit
     @items = Item.where(list_id: params[:id]).order(Sequel.desc(:starred))
-    slim :edit_list, locals: { list: @list, items: @items, newitems: [] }
+    slim :editlist, locals: { list: @list, items: @items, newitems: [] }
   else
     slim :error, locals: { error: 'Invalid permissions' }
   end
@@ -83,13 +87,14 @@ post '/edit/?' do
   @listname = params[:name]
   @list = List.first(id: @listid)
   @items = Item.where(list_id: params[:id]).order(Sequel.desc(:starred))
-  # items_id=params.select {|c| c.to_s =~ /^item/ }
-  # items_desc=params.select{|c| c.to_s =~ /^description/ }
-  user = User.first(id: session[:user_id])
+  user = current_user
   newitems = []
   @errors = {}
   newitems = params[:items_new] if params[:items_new]
   @new_item_errors = {}
+
+  # when user clicks the add-item button and submits I treat these items directly in the route
+  # will show the _additem partial to display the form exactly as before user submitted in case of errors
   if newitems
     newitems.each do |item|
       new_item = Item.new(name: item[:name], description: item[:description], list: @list, user: @user)
@@ -102,16 +107,16 @@ post '/edit/?' do
   end
   if rerenderscript
     flash.now[:danger] = "List '#{@list.name}' could not be updated"
-    slim :edit_list, locals: { list: @list, items: @items, newitems: newitems }
+    slim :editlist, locals: { list: @list, items: @items, newitems: newitems }
   else
     return_value = List.edit_list @listid, @listname, params[:items], user
     @errors = return_value.errors if return_value.errors
     if !@errors.empty?
       flash.now[:danger] = "List '#{@list.name}' could not be updated"
-      slim :edit_list, locals: { list: @list, items: @items, newitems: newitems }
+      slim :editlist, locals: { list: @list, items: @items, newitems: newitems }
     else
       flash.next[:success] = "List '#{@list.name}' has been updated"
-      redirect "http://localhost:4567/list/#{@listid}"
+      redirect "/list/#{@listid}"
     end
   end
 end
@@ -121,11 +126,12 @@ post '/comment/:id' do
   listid = params[:id].to_i
   text = params[:comment].to_s
   Comment.new_comment text, listid, userid
-  redirect 'http://localhost:4567/'
+  flash.next[:success] = 'Comment has been created'
+  redirect "/#{listid}"
 end
 
 post '/permission/?' do
-  user = User.first(id: session[:user_id])
+  user = current_user
   list = List.first(id: params[:id])
   can_change_permission = true
   if list.nil?
@@ -199,13 +205,24 @@ end
 
 get '/delete/:id/?' do
   id = params[:id]
-  # list = List.delete_list id
-  # getting instance of List and calling destroy on it -> will activate destroy hook
   List.first(id: id).destroy
-  redirect 'http://localhost:4567/'
+  flash.next[:success] = 'List has been deleted'
+  redirect '/'
 end
 
 get '/logout/?' do
   session[:user_id] = nil
   redirect '/login'
+end
+
+get '/(:id)?' do
+  if session[:user_id].nil?
+    slim :login
+  else
+    # all_lists =  List.all
+    @user = current_user
+    listid = !params[:id].nil? ? params[:id] : ''
+    all_lists = List.association_join(:permissions).where(user_id: @user.id)
+    slim :list, locals: { list: all_lists, list_modified_id: listid }
+  end
 end

@@ -8,7 +8,7 @@ class List < Sequel::Model
   one_to_many :comments
 
   def self.new_list(name, items, user)
-    list = List.new(name: name, created_at: Time.now)
+    list = List.new(name: name)
     list_saved = list.save
     if list_saved
       if items
@@ -16,9 +16,7 @@ class List < Sequel::Model
           Item.create(
             name: item[:name],
             description: item[:description],
-            list: list, user: user,
-            created_at: Time.now,
-            updated_at: Time.now
+            list: list, user: user
           )
         end
       end
@@ -51,6 +49,12 @@ class List < Sequel::Model
 
   def before_validation
     self.created_at ||= Time.now
+    super
+  end
+
+  def before_save
+    self.created_at ||= self.updated_at = Time.now
+    super
   end
 
   def validate
@@ -64,12 +68,11 @@ class List < Sequel::Model
 
   def self.edit_list(id, name, items, user)
     list = List.first(id: id)
-    # list.name = name
-    # list.updated_at = Time.now
     list.name = name if name
     # list.new? ? list.save : list.save(validate: false)
     list.save
     return list unless list.save
+    return list if items.nil?
     items.each do |item|
       item_id = item[:id].to_i
       if item[:deleted]
@@ -99,22 +102,5 @@ class List < Sequel::Model
       end
     end
     list
-  end
-end
-class Item < Sequel::Model
-  set_primary_key :id
-  many_to_one :user
-  many_to_one :list
-
-  def before_validation
-    self.created_at ||= Time.now
-  end
-
-  def validate
-    super
-    validates_presence %i[name created_at]
-    validates_format /\A[A-Za-z\s]*\Z/, :name, message: 'is not a valid name'
-    validates_min_length 3, :name
-    validates_max_length 20, :name
   end
 end
