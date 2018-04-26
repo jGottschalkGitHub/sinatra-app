@@ -81,7 +81,7 @@ class List < Sequel::Model
         i.starred = item['starred'] ? 1 : 0
         y, m, d = item['date'].split('-') if item['date']
         duedate = Time.utc(y, m, d) if y
-        i.due_date = duedate if duedate && duedate > Time.now
+        i.due_date = duedate if duedate # && duedate > Time.now --> moved to validation
         return i unless i.save
       end
     end

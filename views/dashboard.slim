@@ -32,7 +32,7 @@ css:
   .tasks-wrapper .due_date{
    font-weight: bold;
  }
-  .right-wrapper p{
+  .headline-wrapper p{
     margin-top: 20px;
     font-size: 22px;
     color: #ffffff;
@@ -44,12 +44,32 @@ css:
     font-size: 22px;
     color: #ffffff;
   }
-  .button-wrapper a{
+  .button-wrapper.list a{
     padding: 12px 15px;
     background-color: #e810c4;
     color: #ffffff;
     border-radius: 3px;
+    position: relative;
+    left: -15px;
   }
+   .button-wrapper.starred a{
+    padding: 12px 15px;
+    background-color: #0e148e;
+    color: #ffffff;
+    border-radius: 3px;
+    position: relative;
+    left: -90px;
+   }
+
+   @media only screen and (max-width: 1000px) {
+     .button-wrapper.starred a,
+     .button-wrapper.list a{
+       display: block;
+       text-align: center; 
+       left: 0;
+       margin-bottom: 40px;
+    }
+   } 
 
 .outerwrapper.col-md-12
 .greetings.col-md-12
@@ -58,7 +78,7 @@ css:
 
 .current-time
   p id="current_time"
-.right-wrapper.col-md-10
+.headline-wrapper.col-md-12
   - if items.any?
     p You have some urgent tasks coming up!
     hr
@@ -76,11 +96,26 @@ css:
           .col-md-2.due_date
             .p #{item.due_date&.strftime('%Y-%m-%d')}
         hr
-.button-wrapper.col-md-8
-  a href='/' See all my lists
+.button_outer_wrapper.col-md-12
+  .button-wrapper.col-md-2.list
+    a href='/' Show all lists
+  .button-wrapper.col-md-2.starred
+    a href='/dashboard/starred' Show starred items
+
 
 javascript:
   document.addEventListener('DOMContentLoaded', function() {
+      let href = window.location.href.split('/');
+      href = href[href.length-1];
+      if (href == "starred"){
+        $('.headline-wrapper p').text("Starred items")
+      }
+      else if(href == "dashboard"){
+        $('.headline-wrapper p').text("You have some urgent tasks coming up!")
+      }
+      $('.alert-success').slideUp(2000)
+      $('.alert-danger').fadeOut(2000)
+    
       $(function () {
       var myTimer = null;
       updateTime()
@@ -92,7 +127,11 @@ javascript:
         s = (d.getSeconds()<10?'0':'') + d.getSeconds();
         currentTime = h + ':' + m + ':' + s;
         $('#current_time').text( currentTime );
+        console.log(currentTime)
       }
-     }); 
+     window.onbeforeunload = function(){
+       clearInterval(myTimer)
+      };
+    });
   });                        
 

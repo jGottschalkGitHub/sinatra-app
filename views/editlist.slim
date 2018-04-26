@@ -17,6 +17,9 @@ css:
         position: relative;
         top: 20px;
     }
+    form{
+      margin-bottom: 60px;
+    }
      .delete_items::after{
         color: red;
         content:"X";
@@ -49,8 +52,24 @@ css:
       position: absolute;
       right: 0;
     }
-
-
+      @media only screen and (max-width: 1000px) {
+        .col-md-3{
+          margin-top:20px;
+          margin-bottom:20px;
+        }
+        .col-md-1.delete_items{
+          margin-bottom: 60px;
+        }
+        .col-md-1.delete_items::before{
+          content:""; position: absolute; width: 100%; height:2px;
+          background-color: #ffffff;
+          left: 2px;
+          top: 70px;
+        }
+        label.due_date{
+          margin-right: 10px;
+        }
+      }
 
 .col-md-8.col-md-offset-2
   .has-below
@@ -83,7 +102,7 @@ css:
                     textarea.form-control type="text" name="items[]description" value="#{item.description}" placeholder="#{item.description}"  #{item.description}
                                     
                 .col-md-2
-                  label Due Date
+                  label.due_date Due Date
                   - if item.due_date
                         // 2018-04-05 Format needed for min
                         - curr_time = Time.now.strftime('%Y-%m-%d')
@@ -103,13 +122,20 @@ css:
             .col-md-12
               button.btn.btn-sm.btn-primary type= "submit" SAVE
               a href='javascript:void(0)' id='add-item2' Add Item
-
-      
+              
         - unless @in_get || @errors.empty?
           - name_errors = @errors.on(:name) || []
+          - date_errors = @errors.on(:due_date) || []
           div class=("has-errors" if name_errors.any?)
-            .help-block = name_errors.join(', ') if name_errors.any? 
-            
+            .help-block = name_errors.join(', ') if name_errors.any?
+          div class=("has-errors" if date_errors.any?)
+            .help-block = date_errors[0][:message] if date_errors.any? 
+       
+        - unless @in_get || @new_item_errors.empty?
+          - new_item_name_error = @new_item_errors.on(:name) || []
+          div class=("has-errors" if new_item_name_error.any?)
+            .help-block = new_item_name_error.join(', ')
+
 script type="text/template" id='item_template2'
   .form-group.item-group
       .col-md-4

@@ -12,7 +12,6 @@ helpers do
 end
 
 get '/new/?' do
-  # show create list page
   @list = List.new
   slim :new_list
 end
@@ -21,7 +20,6 @@ get '/list/:id' do
   if session[:user_id].nil?
     redirect '/login'
   else
-    # all_lists = List.all
     @user = current_user
     list = List.first(id: params[:id])
     items = Item.where(list_id: params[:id]).order(Sequel.desc(:starred))
@@ -65,7 +63,7 @@ get '/edit/:id/?' do
   if @list.nil?
     can_edit = false
   elsif @list.shared_with == 'public'
-    user = User.first(id: session[:user_id])
+    user = current_user
     permission = Permission.first(list: @list, user: user)
     can_edit = false if permission.nil? || permission.permission_level == 'read_only'
   end
@@ -84,15 +82,14 @@ post '/edit/?' do
   @listid = params[:id]
   @listname = params[:name]
   @list = List.first(id: @listid)
+  # if rerenderscript = true we want the original items per list ordered by star
   @items = Item.where(list_id: params[:id]).order(Sequel.desc(:starred))
   user = current_user
   newitems = []
   @errors = {}
-  newitems = params[:items_new] if params[:items_new]
   @new_item_errors = {}
-
-  # when user clicks the add-item button and submits I treat these items directly in the route
-  # will show the _additem partial to display the form exactly as before user submitted in case of errors
+  newitems = params[:items_new] if params[:items_new]
+  ### NEW ITEMS###
   if newitems
     newitems.each do |item|
       new_item = Item.new(name: item[:name], description: item[:description], list: @list, user: @user)
@@ -103,10 +100,12 @@ post '/edit/?' do
       end
     end
   end
+  # if submitting of new_items failed due error -> rerender and prefill with item values in slim
   if rerenderscript
     flash.now[:danger] = "List '#{@list.name}' could not be updated"
     slim :editlist, locals: { list: @list, items: @items, newitems: newitems }
   else
+    ### EDIT EXISTING ITEMS ###
     return_value = List.edit_list @listid, @listname, params[:items], user
     @errors = return_value.errors if return_value.errors
     if !@errors.empty?
@@ -118,7 +117,6 @@ post '/edit/?' do
     end
   end
 end
-
 post '/comment/:id' do
   userid = User.first(id: session[:user_id]).id
   listid = params[:id].to_i
@@ -142,10 +140,10 @@ post '/signup/?' do
   @user = User.new(name: params[:name], password: md5sum)
   if @user.save
     session[:user_id] = @user.id
-    flash.now[:success] = "User has been created"
+    flash.next[:success] = 'User has been created'
     redirect '/dashboard'
   else
-    flash.now[:danger] = "User could not be created"
+    flash.now[:danger] = 'User could not be created'
     slim :signup
   end
 end
@@ -154,13 +152,26 @@ get '/login/?' do
   slim :login
 end
 
+get '/dashboard/starred' do
+  # puts request.url
+  # urlparts = request.url.split('/');
+  # path = urlparts[-1]
+  if current_user.nil?
+    slim :login
+  else
+    user_id = current_user.id
+    items = Item.where(user_id: user_id).where(starred: 1).order(Sequel.desc(:starred))
+    slim :dashboard, locals: { items: items }
+  end
+end
+
 get '/dashboard' do
   if current_user.nil?
     slim :login
   else
     user_id = current_user.id
     next_three_days = Time.now + 3 * 24 * 60 * 60
-    items = Item.where(user_id: user_id).where { due_date < next_three_days }.order(Sequel.desc(:starred))
+    items = Item.where(user_id: user_id).where { due_date < next_three_days }.order(Sequel.asc(:due_date))
     slim :dashboard, locals: { items: items }
   end
 end
@@ -172,7 +183,7 @@ post '/login/?' do
     slim :error, locals: { error: 'Invalid login credentials' }
   else
     session[:user_id] = @user.id
-    redirect '/'
+    redirect '/dashboard'
   end
 end
 
