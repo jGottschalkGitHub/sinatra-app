@@ -1,0 +1,87 @@
+css:
+
+  .has-below {
+    padding-bottom: 60px;
+  }
+  #current_time{
+    color: #0e148e;
+    font-size: 20px;
+    padding: 10px 20px;
+    background-color: #ffffff;
+    border: solid 3px #0e148e;
+    border-radius: 5px;
+    position: absolute;
+    top: 65px;
+    right: 15px;
+  }
+  .greetings{
+    color: #ffffff;
+  }
+  .greetings hr{
+    color: #ffffff
+  }
+  .tasks-wrapper .row{
+    background-color: #ffffff;
+    padding: 15px 10px 15px 10px;
+    border-radius: 3px;
+    color: #133263;
+  }
+  .tasks-wrapper .row{
+    margin: auto;
+  }
+ 
+  .right-wrapper p{
+    margin-top: 20px;
+    font-size: 22px;
+    color: #ffffff;
+  }
+  .new_task a{
+    margin-top: 20px;
+    font-size: 22px;
+    color: #ffffff;
+  }
+
+.outerwrapper.col-md-12
+.greetings.col-md-12
+  h1 Hi "#{@user.name}"
+  hr
+
+.current-time
+  p id="current_time"
+.right-wrapper.col-md-10
+  - if items.any?
+    p You have some urgent tasks coming up!
+    hr
+  - else
+    .new_task
+      a href="/new_list" + create new task
+.tasks-wrapper.col-md-8
+    - if items.any?
+      - items.each do |item|
+        .row
+          .col-md-5
+            .p #{item.name.upcase}
+          .col-md-5
+            .p #{item.description}
+          .col-md-2
+            .p #{item.due_date&.strftime('%Y-%m-%d')}
+        hr
+
+
+javascript:
+  document.addEventListener('DOMContentLoaded', function() {
+      $(function () {
+      var myTimer = null;
+      updateTime()
+      myTimer = setInterval(updateTime, 1000)
+      function updateTime(){
+        var d = new Date();
+        h = (d.getHours()<10?'0':'') + d.getHours();
+        m = (d.getMinutes()<10?'0':'') + d.getMinutes();
+        s = (d.getSeconds()<10?'0':'') + d.getSeconds();
+        currentTime = h + ':' + m + ':' + s;
+        $('#current_time').text( currentTime );
+      }
+     }); 
+  });                        
+

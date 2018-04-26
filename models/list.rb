@@ -7,19 +7,10 @@ class List < Sequel::Model
   one_to_many :logs
   one_to_many :comments
 
-  def self.new_list(name, items, user)
+  def self.new_list(name, user)
     list = List.new(name: name)
     list_saved = list.save
     if list_saved
-      if items
-        items.each do |item|
-          Item.create(
-            name: item[:name],
-            description: item[:description],
-            list: list, user: user
-          )
-        end
-      end
       Permission.create(
         list: list,
         user: user,

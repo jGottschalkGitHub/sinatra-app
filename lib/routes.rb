@@ -39,18 +39,16 @@ post '/new/?' do
   # create a list
   @user = current_user
   items = params[:items]
-  @list = List.new_list params[:name], items, @user
+  @list = List.new_list params[:name], @user
   list_id = @list.id if @list.id
   if list_id
     if items
       items.each do |item|
-        new_item = Item.new(name: item[:name], description: item[:description],list: @list, user: @user)
+        new_item = Item.new(name: item[:name], description: item[:description], list: @list, user: @user)
         new_item.save if new_item.valid?
-        unless new_item.errors.empty?
-          flash.next[:danger] = "Item could not be created"
-        end
+        flash.next[:danger] = 'Item could not be created' if new_item.errors.any?
       end
-    end 
+    end
     flash.next[:success] = "List '#{@list.name}' has been created"
     redirect "/list/#{list_id}"
   else
@@ -130,40 +128,6 @@ post '/comment/:id' do
   redirect "/#{listid}"
 end
 
-post '/permission/?' do
-  user = current_user
-  list = List.first(id: params[:id])
-  can_change_permission = true
-  if list.nil?
-    can_change_permission = false
-  elsif list.shared_with != 'public'
-    permission = Permission.first(list: list, user: user)
-    can_change_permission = false if permission.nil? || permission.permission_level == 'read_only'
-  end
-  if can_change_permission
-    list.permission = params[:new_permissions]
-    list.save
-    current_permissions = Permission.first(list: list)
-    permissions.each(&:destroy)
-    current_permissions.each(&:destroy)
-    if params[:new_permissions] == 'private' || params[:new_permissions] == 'shared'
-      user_perms.each do |perm|
-        u = User.first(perm[:user])
-        Permission.create(
-          list: list,
-          user: u,
-          permission_level: perm[:level],
-          created_at: Time.now,
-          updated_at: Time.now
-        )
-      end
-    end
-    redirect request.referer
-  else
-    slim :error, locals: { error: 'Invalid permissions' }
-  end
-end
-
 get '/signup/?' do
   @user = User.new
   if session[:user_id].nil?
@@ -188,7 +152,18 @@ get '/login/?' do
   if session[:user_id].nil?
     slim :login
   else
-    redirect '/'
+    redirect '/dashboard'
+  end
+end
+
+get '/dashboard' do
+  if current_user.nil?
+    slim :login
+  else
+    user_id = current_user.id
+    next_three_days = Time.now + 3 * 24 * 60 * 60
+    items = Item.where(user_id: user_id).where { due_date < next_three_days }.order(Sequel.desc(:starred))
+    slim :dashboard, locals: { items: items }
   end
 end
 

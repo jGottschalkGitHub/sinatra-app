@@ -1,0 +1,31 @@
+Layout/IndentationWidth:
+  Width: 2
+Metrics/AbcSize:
+  Enabled: false
+Metrics/LineLength:
+  Max: 120
+Metrics/MethodLength:
+  Enabled: false
+Metrics/BlockLength:
+  Enabled: false
+Metrics/ClassLength:
+  Enabled: false
+Style/Documentation:
+  Enabled: false
+Style/NumericPredicate:
+  AutoCorrect: false # it replaces price == 0 with price.zero? which breaks when price is nil
+Style/PercentLiteralDelimiters:
+  Enabled: false
+  AutoCorrect: false # changes too much in existing code, including code it autocorrected in the previous version
+Style/SignalException:
+  AutoCorrect: false
+Style/SpecialGlobalVars:
+  AutoCorrect: false
+Style/ZeroLengthPredicate:
+  AutoCorrect: false
+Lint/AmbiguousRegexpLiteral:
+  Enabled: false
+Lint/UnusedBlockArgument:
+  AutoCorrect: false
+Lint/UnusedMethodArgument:
+  AutoCorrect: false
