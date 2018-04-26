@@ -14,7 +14,7 @@ class User < Sequel::Model
     validates_presence %i[name created_at]
     validates_format /\A[A-Za-z]*\Z/, :name, message: 'is not a valid name'
     validates_min_length 3, :name
-    validates_max_length 8, :name
+    validates_max_length 15, :name
     validates_unique :name
   end
 end

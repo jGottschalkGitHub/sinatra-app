@@ -19,7 +19,7 @@ end
 
 get '/list/:id' do
   if session[:user_id].nil?
-    slim :error
+    redirect '/login'
   else
     # all_lists = List.all
     @user = current_user
@@ -142,18 +142,16 @@ post '/signup/?' do
   @user = User.new(name: params[:name], password: md5sum)
   if @user.save
     session[:user_id] = @user.id
-    redirect '/login'
+    flash.now[:success] = "User has been created"
+    redirect '/dashboard'
   else
+    flash.now[:danger] = "User could not be created"
     slim :signup
   end
 end
 
 get '/login/?' do
-  if session[:user_id].nil?
-    slim :login
-  else
-    redirect '/dashboard'
-  end
+  slim :login
 end
 
 get '/dashboard' do
@@ -187,9 +185,11 @@ end
 
 get '/logout/?' do
   session[:user_id] = nil
-  redirect '/login'
+  slim :logged_out
 end
 
+# :id is optional since I want to pass in the id of a newly created 
+# commentid here to scroll to the respective comment in DOM in list.slim
 get '/(:id)?' do
   if session[:user_id].nil?
     slim :login

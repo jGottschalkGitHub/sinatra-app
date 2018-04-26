@@ -29,16 +29,26 @@ css:
   .tasks-wrapper .row{
     margin: auto;
   }
- 
+  .tasks-wrapper .due_date{
+   font-weight: bold;
+ }
   .right-wrapper p{
     margin-top: 20px;
     font-size: 22px;
     color: #ffffff;
   }
+  .new_task{
+    margin-bottom: 30px;
+  }
   .new_task a{
-    margin-top: 20px;
     font-size: 22px;
     color: #ffffff;
+  }
+  .button-wrapper a{
+    padding: 12px 15px;
+    background-color: #e810c4;
+    color: #ffffff;
+    border-radius: 3px;
   }
 
 .outerwrapper.col-md-12
@@ -63,10 +73,11 @@ css:
             .p #{item.name.upcase}
           .col-md-5
             .p #{item.description}
-          .col-md-2
+          .col-md-2.due_date
             .p #{item.due_date&.strftime('%Y-%m-%d')}
         hr
-
+.button-wrapper.col-md-8
+  a href='/' See all my lists
 
 javascript:
   document.addEventListener('DOMContentLoaded', function() {
