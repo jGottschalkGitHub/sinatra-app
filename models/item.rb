@@ -5,15 +5,7 @@ class Item < Sequel::Model
   many_to_one :list
 
   def before_validation
-    puts 'inside before_validate item'
     self.created_at = Time.now
-    super
-  end
-
-  def before_save
-    puts 'inside before_save item'
-    self.created_at ||= self.updated_at = Time.now
-    puts self.created_at
     super
   end
 

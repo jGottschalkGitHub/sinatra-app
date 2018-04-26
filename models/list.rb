@@ -43,11 +43,6 @@ class List < Sequel::Model
     super
   end
 
-  def before_save
-    self.created_at ||= self.updated_at = Time.now
-    super
-  end
-
   def validate
     super
     validates_presence %i[name created_at]
@@ -76,9 +71,7 @@ class List < Sequel::Model
           name: item['name'],
           description: item[:description],
           list: list,
-          user: user,
-          created_at: Time.now,
-          updated_at: Time.now
+          user: user
         )
       else
         name = item['name']

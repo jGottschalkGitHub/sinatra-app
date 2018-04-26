@@ -84,7 +84,6 @@ css:
                 .col-md-12.col-md-offset-10
                     button.btn.btn-sm.btn-primary type= "submit" SAVE
                     a href='javascript:void(0)' id='add-item2' class='col-md-3' Add Item
-            - puts @new_item_errors
             //- name_errors.concat(@new_item_errors) if @new_item_errors
             - unless @in_get || @errors.empty?
                 - name_errors = @errors.on(:name) || []
