@@ -192,7 +192,7 @@ css:
                                         p #{comment.text}
 
                                     div
-                                        - if comment.editable? @user
+                                        - if comment.editable? current_user
                                             a class="delete_button" href="/comment/delete/#{comment.id}" delete
                             
                 hr           

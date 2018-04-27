@@ -9,7 +9,7 @@ class List < Sequel::Model
 
   def self.new_list(name, user)
     list = List.new(name: name)
-    list_saved = list.save
+    list_saved = list.save # I need the list id in the route
     if list_saved
       Permission.create(
         list: list,
@@ -52,38 +52,25 @@ class List < Sequel::Model
     validates_unique :name
   end
 
-  def self.edit_list(id, name, items, user)
+  def self.edit_list(id, name, items)
     list = List.first(id: id)
     list.name = name if name
-    # list.new? ? list.save : list.save(validate: false)
-    list.save
-    return list unless list.save
-    return list if items.nil?
+    return list if !list.save || items.nil?
     items.each do |item|
-      item_id = item[:id].to_i
+      item_id = item[:id]
       if item[:deleted]
         Item.first(id: item_id).destroy
         next
       end
       i = Item.first(id: item_id)
-      if i.nil?
-        Item.new(
-          name: item['name'],
-          description: item[:description],
-          list: list,
-          user: user
-        )
-      else
-        name = item['name']
-        i.name = name
-        i.description = item['description']
-        i.updated_at = Time.now
-        i.starred = item['starred'] ? 1 : 0
-        y, m, d = item['date'].split('-') if item['date']
-        duedate = Time.utc(y, m, d) if y
-        i.due_date = duedate if duedate # && duedate > Time.now --> moved to validation
-        return i unless i.save
-      end
+      name = item['name']
+      i.name = name
+      i.description = item['description']
+      i.starred = item['starred'] ? 1 : 0
+      y, m, d = item['date'].split('-') if item['date']
+      duedate = Time.utc(y, m, d) if y
+      i.due_date = duedate if duedate # && duedate > Time.now --> moved to validation
+      return i unless i.save
     end
     list
   end

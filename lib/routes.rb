@@ -2,7 +2,6 @@ before do
   if !%w[login signup].include?(request.path_info.split('/')[1]) && session[:user_id].nil? && !request.post?
     redirect '/login'
   end
-  @user = current_user
 end
 
 helpers do
@@ -20,7 +19,6 @@ get '/list/:id' do
   if session[:user_id].nil?
     redirect '/login'
   else
-    @user = current_user
     list = List.first(id: params[:id])
     items = Item.where(list_id: params[:id]).order(Sequel.desc(:starred))
     slim :list_detail, locals: { list: list, items: items }
@@ -34,16 +32,14 @@ get '/comment/delete/:id' do
 end
 
 post '/new/?' do
-  # create a list
-  @user = current_user
   items = params[:items]
-  @list = List.new_list params[:name], @user
+  @list = List.new_list params[:name], current_user
   list_id = @list.id if @list.id
-  if list_id
-    if items
+  if !list_id.nil?
+    unless items.nil?
       items.each do |item|
-        new_item = Item.new(name: item[:name], description: item[:description], list: @list, user: @user)
-        new_item.save if new_item.valid?
+        new_item = Item.new(name: item[:name], description: item[:description], list: @list, user: current_user)
+        new_item.save
         flash.next[:danger] = 'Item could not be created' if new_item.errors.any?
       end
     end
@@ -56,7 +52,6 @@ post '/new/?' do
 end
 
 get '/edit/:id/?' do
-  # check user permission and show the edit page
   @list = List.first(id: params[:id])
   @in_get = true
   can_edit = true
@@ -78,13 +73,12 @@ end
 
 post '/edit/?' do
   rerenderscript = false
-  @in_get = false
+  @in_get = false# in
   @listid = params[:id]
   @listname = params[:name]
   @list = List.first(id: @listid)
   # if rerenderscript = true we want the original items per list ordered by star
   @items = Item.where(list_id: params[:id]).order(Sequel.desc(:starred))
-  user = current_user
   newitems = []
   @errors = {}
   @new_item_errors = {}
@@ -92,9 +86,8 @@ post '/edit/?' do
   ### NEW ITEMS###
   if newitems
     newitems.each do |item|
-      new_item = Item.new(name: item[:name], description: item[:description], list: @list, user: @user)
-      new_item.save if new_item.valid?
-      unless new_item.errors.empty?
+      new_item = Item.new(name: item[:name], description: item[:description], list: @list, user: current_user)
+      unless new_item.save
         @new_item_errors = new_item.errors
         rerenderscript = true
       end
@@ -106,7 +99,7 @@ post '/edit/?' do
     slim :editlist, locals: { list: @list, items: @items, newitems: newitems }
   else
     ### EDIT EXISTING ITEMS ###
-    return_value = List.edit_list @listid, @listname, params[:items], user
+    return_value = List.edit_list @listid, @listname, params[:items], current_user
     @errors = return_value.errors if return_value.errors
     if !@errors.empty?
       flash.now[:danger] = "List '#{@list.name}' could not be updated"
@@ -120,16 +113,15 @@ end
 post '/comment/:id' do
   userid = current_user.id
   listid = params[:id].to_i
-  lists = List.association_join(:permissions).where(user_id: userid)
   text = params[:comment].to_s
   comment = Comment.new(list_id: listid, user_id: userid, text: text, creation_date: Time.now)
   if comment.save
     flash.next[:success] = 'Comment has been created'
-    redirect "/#{listid}"
   else
-    flash.now[:danger] = 'Comment can not be empty'
-    slim :list, locals: { lists: lists, list_modified_id: '' }
+    listid = ''
+    flash.next[:danger] = 'Comment can not be empty'
   end
+  redirect "/#{listid}"
 end
 
 get '/signup/?' do
@@ -212,9 +204,8 @@ get '/(:id)?' do
     slim :login
   else
     # all_lists =  List.all
-    @user = current_user
     listid = !params[:id].nil? ? params[:id] : ''
-    all_lists = List.association_join(:permissions).where(user_id: @user.id)
+    all_lists = List.association_join(:permissions).where(user_id: current_user.id)
     slim :list, locals: { lists: all_lists, list_modified_id: listid }
   end
 end

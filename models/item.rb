@@ -9,6 +9,10 @@ class Item < Sequel::Model
     super
   end
 
+  def before_save
+    self.updated_at = Time.now
+  end
+
   def validate
     super
     validates_presence %i[name created_at]
