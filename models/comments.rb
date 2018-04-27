@@ -7,12 +7,11 @@ class Comment < Sequel::Model
   many_to_one :list
 
   def self.new_comment(text, listid, userid)
-    creat_date = Time.now
     Comment.create(
       list_id: listid,
       user_id: userid,
       text: text,
-      creation_date: creat_date
+      creation_date: Time.now
     )
   end
 
