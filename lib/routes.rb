@@ -118,12 +118,18 @@ post '/edit/?' do
   end
 end
 post '/comment/:id' do
-  userid = User.first(id: session[:user_id]).id
+  userid = current_user.id
   listid = params[:id].to_i
+  lists = List.association_join(:permissions).where(user_id: userid)
   text = params[:comment].to_s
-  Comment.new_comment text, listid, userid
-  flash.next[:success] = 'Comment has been created'
-  redirect "/#{listid}"
+  comment = Comment.new(list_id: listid, user_id: userid, text: text, creation_date: Time.now)
+  if comment.save
+    flash.next[:success] = 'Comment has been created'
+    redirect "/#{listid}"
+  else
+    flash.now[:danger] = 'Comment can not be empty'
+    slim :list, locals: { lists: lists, list_modified_id: '' }
+  end
 end
 
 get '/signup/?' do
@@ -209,6 +215,6 @@ get '/(:id)?' do
     @user = current_user
     listid = !params[:id].nil? ? params[:id] : ''
     all_lists = List.association_join(:permissions).where(user_id: @user.id)
-    slim :list, locals: { list: all_lists, list_modified_id: listid }
+    slim :list, locals: { lists: all_lists, list_modified_id: listid }
   end
 end

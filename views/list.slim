@@ -165,7 +165,7 @@ css:
     .row.mylists data-listmodifiedid="#{list_modified_id}"
         h1 Lists
         .col-md-12.wrapper
-            - list.each_with_index do |list,i|
+            - lists.each_with_index do |list,i|
                 .row.onelist
                     .list_link 
                         a href= "list/#{list.id}" 
@@ -211,9 +211,7 @@ javascript:
             $(element).toggle(500)
             $('html, body').animate({
                 scrollTop: $(element).offset().top
-            }, 1000);
-            
-            
+            }, 1000);     
         }
         $(document).on('click', '.buttontoggle i', function(){
             let toggleid = $(this).data( 'toggleid' )
