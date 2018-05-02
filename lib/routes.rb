@@ -99,7 +99,7 @@ post '/edit/?' do
     slim :editlist, locals: { list: @list, items: @items, newitems: newitems }
   else
     ### EDIT EXISTING ITEMS ###
-    return_value = List.edit_list @listid, @listname, params[:items], current_user
+    return_value = List.edit_list @listid, @listname, params[:items]
     @errors = return_value.errors if return_value.errors
     if !@errors.empty?
       flash.now[:danger] = "List '#{@list.name}' could not be updated"
@@ -169,7 +169,7 @@ get '/dashboard' do
   else
     user_id = current_user.id
     next_three_days = Time.now + 3 * 24 * 60 * 60
-    items = Item.where(user_id: user_id).where { due_date < next_three_days }.order(Sequel.asc(:due_date))
+    items = Item.where(user_id: user_id).where{ (due_date > Time.now) & (due_date < next_three_days) }.order(Sequel.asc(:due_date))
     slim :dashboard, locals: { items: items }
   end
 end
